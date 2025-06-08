@@ -5,7 +5,7 @@
 GameWorld::GameWorld() : listenSock(INVALID_SOCKET), iocp(NULL), running(false)
 {
 	InitializeCriticalSection(&playersCriticalSection);
-	mapPtr = new Map(-32, 2, -2, 10); 
+	mapPtr = new Map(-28, 24, -2, 8); 
 
 	traps.insert({ "T1", MovingTrap(3.0f, 0.0f, *mapPtr, "T1") });
 	traps.insert({ "T2", MovingTrap(3.0f, 0.0f, *mapPtr, "T2") });
@@ -13,6 +13,10 @@ GameWorld::GameWorld() : listenSock(INVALID_SOCKET), iocp(NULL), running(false)
 	traps.insert({ "T4", MovingTrap(3.0f, 0.0f, *mapPtr, "T4") });
 	traps.insert({ "T5", MovingTrap(3.0f, 0.0f, *mapPtr, "T5") });
 	traps.insert({ "T6", MovingTrap(3.0f, 0.0f, *mapPtr, "T6") });
+	traps.insert({ "T7", MovingTrap(3.0f, 0.0f, *mapPtr, "T7") });
+	traps.insert({ "T8", MovingTrap(3.0f, 0.0f, *mapPtr, "T8") });
+	traps.insert({ "T9", MovingTrap(3.0f, 0.0f, *mapPtr, "T9") });
+	traps.insert({ "T10", MovingTrap(3.0f, 0.0f, *mapPtr, "T10") });
 
 }
 
