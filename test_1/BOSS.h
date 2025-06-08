@@ -36,17 +36,16 @@ public:
     float x, y;
     int hp;
     int maxHp;
-	bool Boss2Phase= false;
+	bool Boss2Phase = false;
     void lock() const;
     void unlock() const;
     bool tryLock();
 private:
-    void attack();        // 행동 실행 (추후 확장 가능)
-    void movePattern();   // 이동 로직 (필요시)
+    void attack();        // 행동 실행 (미구현)
+    void movePattern();   // 이동 로직 (미구현)
 
     BossState currentState;
-
-    DWORD lastUpdateTime; // 마지막 상태 갱신 시간
+    DWORD lastUpdateTime; 
     
     int previousHp;
     BossState previousState;

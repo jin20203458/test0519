@@ -1,5 +1,6 @@
 #pragma once
 #include "Map.h"
+#include <print>
 #include <cmath>
 #include <random>
 #include <string>
@@ -8,9 +9,10 @@ constexpr float TRAP_SPEED = 0.2f; // 트랩 속도
 class MovingTrap {
 public:
     MovingTrap(float x, float y, const Map& map, const std::string& id)
-        : x(x), y(y), speed(TRAP_SPEED), mapRef(map), id(id) 
+        : x(x), y(y), speed(TRAP_SPEED), mapRef(map), id(id)
     {
         setRandomDirection();
+        TrapHP = 40.0f; // 초기 HP 설정
     }
 
     void update()
@@ -29,6 +31,14 @@ public:
         }
     }
 
+    bool takeDamage(float amount)
+    {
+        TrapHP -= amount;
+		std::print("Trap {} took damage: {}. Remaining HP: {}\n", id, amount, TrapHP);  
+        return TrapHP <= 0.0f;
+    }
+
+    float getTrapHP() const { return TrapHP; } // 트랩의 HP 반환
     float getX() const { return x; }
     float getY() const { return y; }
     const std::string& getId() const { return id; } // 식별자 반환
@@ -39,31 +49,33 @@ private:
     float speed;
     const Map& mapRef;
     std::string id;   // 고유 식별자
-
-    void setRandomDirection() {
+    float TrapHP;     // 트랩의 HP
+    void setRandomDirection()
+    {
         static std::random_device rd;
         static std::mt19937 gen(rd());
         static std::uniform_real_distribution<float> offset(-3.0f, 3.0f); // 주변 3칸 범위
 
-		// 랜덤한 위치 생성
+        // 랜덤한 위치 생성
         float tx = x + offset(gen);
         float ty = y + offset(gen);
 
-		// 방향 단위 벡터 계산
+        // 방향 단위 벡터 계산
         float vx = tx - x;
         float vy = ty - y;
         float mag = std::sqrt(vx * vx + vy * vy);
 
-		// 방향 단위 벡터 정규화
+        // 방향 단위 벡터 정규화
         if (mag != 0.0f)
         {
             dirX = vx / mag;
             dirY = vy / mag;
         }
-		else  // 0으로 나누는 경우 방지
+        else  // 0으로 나누는 경우 방지
         {
             dirX = 1.0f;
             dirY = 0.0f;
         }
     }
+
 };

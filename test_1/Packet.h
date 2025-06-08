@@ -9,7 +9,8 @@ enum class PacketType : uint8_t
     PlayerInit = 0x01,
     PlayerUpdate = 0x02,
     MonsterUpdate = 0x03,
-    WorldUpdate = 0x04
+    WorldUpdate = 0x04,
+	TrapUpdate = 0x05,
 };
 
 enum class AnimType : uint8_t

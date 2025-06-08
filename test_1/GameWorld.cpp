@@ -7,12 +7,12 @@ GameWorld::GameWorld() : listenSock(INVALID_SOCKET), iocp(NULL), running(false)
 	InitializeCriticalSection(&playersCriticalSection);
 	mapPtr = new Map(-32, 2, -2, 10); 
 
-	// MovingTrap 초기화
-	traps.emplace_back(0.0f, 0.0f, *mapPtr, "T1");
-	traps.emplace_back(3.0f, 0.0f, *mapPtr, "T2");
-	traps.emplace_back(3.0f, 0.0f, *mapPtr, "T3");
-	traps.emplace_back(3.0f, 0.0f, *mapPtr, "T4");
-	traps.emplace_back(3.0f, 0.0f, *mapPtr, "T5");
+	traps.insert({ "T1", MovingTrap(3.0f, 0.0f, *mapPtr, "T1") });
+	traps.insert({ "T2", MovingTrap(3.0f, 0.0f, *mapPtr, "T2") });
+	traps.insert({ "T3", MovingTrap(3.0f, 0.0f, *mapPtr, "T3") });
+	traps.insert({ "T4", MovingTrap(3.0f, 0.0f, *mapPtr, "T4") });
+	traps.insert({ "T5", MovingTrap(3.0f, 0.0f, *mapPtr, "T5") });
+	traps.insert({ "T6", MovingTrap(3.0f, 0.0f, *mapPtr, "T6") });
 
 }
 
@@ -69,6 +69,7 @@ void GameWorld::start()
 	// 보스 행동 주기적 업데이트
 	bossThread = std::thread(&GameWorld::updateBossLoop, this);
 	bossThread.detach();
+
 	// 맵 주기적 업데이트
 	mapThread = std::thread(&GameWorld::updateMapLoop, this);
 	mapThread.detach();
@@ -153,11 +154,33 @@ void GameWorld::workerThread()
 			// 패킷 타입을 읽고 처리
 			PacketType dataType = packet.header.type;
 
-			if     (dataType == PacketType::PlayerInit)   player->processInit(packet);
-			else if(dataType == PacketType::PlayerUpdate) player->processUpdate(packet);
-			else if(dataType == PacketType::MonsterUpdate)processMonsterUpdate(packet);
+			if (dataType == PacketType::PlayerInit)   player->processInit(packet);
+			else if (dataType == PacketType::PlayerUpdate) player->processUpdate(packet);
+			else if (dataType == PacketType::MonsterUpdate)processMonsterUpdate(packet);
+			else if (dataType == PacketType::TrapUpdate)processTrapUpdate(packet);
 			else    std::cerr << "Invalid packet type\n";
 		}
+	}
+}
+
+void GameWorld::processTrapUpdate(Packet& packet)
+{
+	std::string trapId = packet.readString();
+	int dmg = packet.read<int>();
+
+	auto it = traps.find(trapId);
+	if (it != traps.end())
+	{
+		if(it->second.takeDamage(dmg))
+		{
+			std::print("Trap {} destroyed\n", trapId);
+			traps.erase(it); // 트랩이 파괴되면 제거
+		}
+	
+	}
+	else
+	{
+		std::cerr << "Trap not found: " << trapId << "\n";
 	}
 }
 
@@ -182,11 +205,9 @@ void GameWorld::updateBossLoop()
 
 void GameWorld::updateMovingTraps()
 {
-	for (auto& trap : traps) 
+	for (auto& [id, trap] : traps)
 	{
 		trap.update();
-		/*std::print("Trap {} is at ({:.2f}, {:.2f})\n",
-			trap.getId(), trap.getX(), trap.getY());*/
 	}
 }
 
@@ -228,12 +249,13 @@ void GameWorld::sendWorldData() // 보낼 데이터
 		//Boss2Phase가 true일 때만 트랩 정보 전송
 		if (boss.Boss2Phase)
 		{
-			worldPacket.write<uint8_t>(traps.size()); // 트랩 개수
-			for (const auto& trap : traps)
+			worldPacket.write<uint8_t>(traps.size());
+			for (const auto& [id, trap] : traps)
 			{
-				worldPacket.writeString(trap.getId());        // 트랩 ID
-				worldPacket.write<float>(trap.getX());        // 트랩 X 좌표
-				worldPacket.write<float>(trap.getY());        // 트랩 Y 좌표
+				worldPacket.writeString(id);              // ID 직접 사용
+				worldPacket.write<float>(trap.getX());
+				worldPacket.write<float>(trap.getY());
+				worldPacket.write<int>(trap.getTrapHP());
 			}
 		}
 		else

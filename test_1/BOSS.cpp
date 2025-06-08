@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <ctime>
 
-BOSS::BOSS() : x(0), y(0), hp(1600), maxHp(3000), currentState(BossState::IDLE)
+BOSS::BOSS() : x(0), y(0), hp(1501), maxHp(3000), currentState(BossState::IDLE)
 {
 	previousHp = hp;
 	previousState = currentState;

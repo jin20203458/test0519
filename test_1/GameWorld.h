@@ -5,7 +5,7 @@
 #include "PlayerData.h"
 #include "BOSS.h"
 #include "MovingTrap.h"
-constexpr int PORT = 8000;
+constexpr int PORT = 5000;
 constexpr int SEND_BUFFER_SIZE = 4096;
 
 class GameWorld {
@@ -27,6 +27,7 @@ private:
     void updateMapLoop();
     void updateMovingTraps();
     void processMonsterUpdate(Packet& packet);
+	void processTrapUpdate(Packet& packet);
     void updateBossLoop();
 
     void workerThread();
@@ -34,7 +35,7 @@ private:
    
     bool running;
     Map* mapPtr;
-    std::vector<MovingTrap> traps;
+    std::unordered_map<std::string, MovingTrap> traps;
     BOSS boss;
 
     SOCKET listenSock;
